@@ -19,10 +19,13 @@ public:
 	void setOutput(int, Neuron);
 
 	Neuron &get(int, int);
+	Neuron &getInput(int);
 	Neuron &getOutput(int);
 	std::vector<float> getResult();
 
 	ChessAI merge(ChessAI);
+
+	ChessAI &operator=(ChessAI other);
 
 private:
 	Neuron _input[IN_SIZE];

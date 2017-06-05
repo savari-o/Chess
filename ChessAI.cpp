@@ -70,6 +70,10 @@ Neuron &ChessAI::get(int layer, int node) {
 	return (_hidden[layer][node]);
 }
 
+Neuron &ChessAI::getInput(int node) {
+	return (_input[node]);
+}
+
 Neuron &ChessAI::getOutput(int node) {
 	return (_output[node]);
 }
@@ -92,7 +96,6 @@ ChessAI ChessAI::merge(ChessAI other) {
 				for (int k = 0; k < IN_SIZE; k++) {
 					float f = 0;
 					if (rand() % mutating == 0) {
-						std::cout << "Mutate : " << i << ";" << j << " : " << k << std::endl;
 						f = (rand() % 1000) / 1000.0;
 					}
 					else if (rand() % 2 == 0) {
@@ -108,7 +111,6 @@ ChessAI ChessAI::merge(ChessAI other) {
 				for (int k = 0; k < HI_SIZE; k++) {
 					float f = 0;
 					if (rand() % mutating == 0) {
-						std::cout << "Mutate : " << i << ";" << j << " : " << k << std::endl;
 						f = (rand() % 1000) / 1000.0;
 					}
 					else if (rand() % 2 == 0) {
@@ -126,7 +128,6 @@ ChessAI ChessAI::merge(ChessAI other) {
 		for (int j = 0; j < HI_SIZE; j++) {
 			float f = 0;
 			if (rand() % mutating == 0) {
-				std::cout << "Mutate : " << i << " : " << j << std::endl;
 				f = (rand() % 1000) / 1000.0;
 			}
 			else if (rand() % 2 == 0) {
@@ -139,4 +140,34 @@ ChessAI ChessAI::merge(ChessAI other) {
 		}
 	}
 	return (newIA);
+}
+
+ChessAI &ChessAI::operator=(ChessAI other) {
+	for (int i = 0; i < IN_SIZE; i++) {
+		_input[i] = other._input[i];
+	}
+
+	for (int i = 0; i < HI_SIZE; i++) {
+		_hidden[0][i] = other._hidden[0][i];
+		_hidden[0][i].setInputs(IN_SIZE, _input);
+		for (int j = 0; j < IN_SIZE; j++) {
+			_hidden[0][i].setInput(j, NULL, other._hidden[0][i].getInput(j));
+		}
+		for (int j = 1; j < HI_NBR; j++) {
+			_hidden[j][i] = other._hidden[j][i];
+			_hidden[j][i].setInputs(HI_SIZE, _hidden[j - 1]);
+			for (int k = 0; k < IN_SIZE; k++) {
+				_hidden[j][i].setInput(k, NULL, other._hidden[j][i].getInput(k));
+			}
+		}
+	}
+
+	for (int i = 0; i < OUT_SIZE; i++) {
+		_output[i] = other._output[i];
+		_output[i].setInputs(HI_SIZE, _hidden[HI_NBR - 1]);
+		for (int j = 0; j < HI_SIZE; j++) {
+			_output[i].setInput(j, NULL, other._output[i].getInput(j));
+		}
+	}
+	return (*this);
 }

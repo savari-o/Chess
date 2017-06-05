@@ -11,12 +11,12 @@ public:
 
 	void			setOutput(double output);
 	void			setInputs(unsigned int n, Neuron *neuron);
-	void			setInput(unsigned int n, Neuron *neuron, double value = -1);
+	void			setInput(unsigned int n, Neuron *neuron, double value);
 
 	double			getOutput();
-	double			getInput(unsigned int n);
-	Neuron			*getNeuron(unsigned int n);
-	unsigned int	getNbInput();
+	double			getInput(unsigned int n) const;
+	Neuron			*getNeuron(unsigned int n) const;
+	unsigned int	getNbInput() const;
 
 	double			sigmoid(double x);
 	double			inputSum();

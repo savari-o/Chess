@@ -24,17 +24,8 @@ void	Neuron::setOutput(double output) {
 void	Neuron::setInputs(unsigned int nb_input, Neuron *input) {
 	_input.clear();
 
-	_input = std::vector<std::pair<Neuron *, double> >(
-		nb_input,
-		std::pair<Neuron *, double>(
-			NULL,
-			0
-		)
-	);
-
 	for (unsigned int i = 0; i < nb_input; ++i) {
-		_input[i].first = &(input[i]);
-		_input[i].second = static_cast<double>(rand()) / RAND_MAX;
+		_input.push_back(std::pair<Neuron *, double>(&(input[i]), (rand() / double(RAND_MAX)) * 2 - 1));
 	}
 	_nInput = nb_input;
 }
@@ -44,30 +35,25 @@ void	Neuron::setInput(unsigned int n, Neuron *neuron, double value) {
 		if (neuron != NULL) {
 			_input[n].first = neuron;
 		}
-		if (value >= 0) {
-			_input[n].second = value;
-		}
-		else {
-			_input[n].second = static_cast<double>(rand()) / RAND_MAX;
-		}
+		_input[n].second = value;
 	}
 }
 
-double	Neuron::getInput(unsigned int n) {
+double	Neuron::getInput(unsigned int n) const {
 	if (n < _nInput) {
 		return (_input[n].second);
 	}
 	return (0);
 }
 
-Neuron	*Neuron::getNeuron(unsigned int n) {
+Neuron	*Neuron::getNeuron(unsigned int n) const {
 	if (n < _nInput) {
 		return (_input[n].first);
 	}
 	return (NULL);
 }
 
-unsigned int	Neuron::getNbInput() {
+unsigned int	Neuron::getNbInput() const {
 	return (_nInput);
 }
 

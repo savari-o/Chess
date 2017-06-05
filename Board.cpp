@@ -198,7 +198,7 @@ void Board::play(bool trainIA) {
 	int fx, fy, tx, ty;
 	int color = 1;
 
-	for (int i = 0; i < 100 && fx != 16; i++) {
+	for (int i = 0; i < 20 && fx != 16; i++) {
 		if (!trainIA) {
 			print();
 		}
@@ -216,33 +216,46 @@ void Board::play(bool trainIA) {
 			std::cin >> action;
 		}
 		else {
-			ChessAI &player = (color == 0 ? _a : _b);
 			float board[IN_SIZE];
-			for (int i = 0; i < BOARD_WIDTH; i++) {
-				for (int j = 0; j < BOARD_HEIGHT; j++) {
-					if (_board[i][j] != nullptr) {
-						// TODO : modifier "_board[i][j]->getColor() == 0" avec "_board[i][j]->getColor() == COULEUR_DE_L'IA"
-						board[i * BOARD_HEIGHT + j] = (_board[i][j]->getName() == "King" ? 1.0 : _board[i][j]->getValue() / 20.0) * (_board[i][j]->getColor() == 0 ? 1 : -1);
-					}
-					else {
-						board[i * BOARD_HEIGHT + j] = 0;
+			std::vector<float> result;
+			if (color == 0) {
+				for (int i = 0; i < BOARD_WIDTH; i++) {
+					for (int j = BOARD_HEIGHT - 1; j >= 0; j--) {
+						if (_board[i][j] != nullptr) {
+							board[i * BOARD_HEIGHT + j] = (_board[i][j]->getName() == "King" ? 1.0 : _board[i][j]->getValue() / 20.0) * (_board[i][j]->getColor() == 0 ? 1 : -1);
+						}
+						else {
+							board[i * BOARD_HEIGHT + j] = 0;
+						}
 					}
 				}
+				_a.setInputs(board);
+				result = _a.getResult();
 			}
-			player.setInputs(board);
-			std::vector<float> result = player.getResult();
+			else {
+				for (int i = 0; i < BOARD_WIDTH; i++) {
+					for (int j = 0; j < BOARD_HEIGHT; j++) {
+						if (_board[i][j] != nullptr) {
+							board[i * BOARD_HEIGHT + j] = (_board[i][j]->getName() == "King" ? 1.0 : _board[i][j]->getValue() / 20.0) * (_board[i][j]->getColor() == 1 ? 1 : -1);
+						}
+						else {
+							board[i * BOARD_HEIGHT + j] = 0;
+						}
+					}
+				}
+				_b.setInputs(board);
+				result = _b.getResult();
+			}
 			action = "a1a1";
 			action[0] = int((result[0] + 1) / 2 * (BOARD_WIDTH)) + 'a';
-			action[1] = int((result[1] + 1) / 2 * (BOARD_HEIGHT)) + '1';
+			action[1] = int(((color == 0 ? -1 : 1) * result[1] + 1) / 2 * (BOARD_HEIGHT)) + '1';
 			action[2] = int((result[2] + 1) / 2 * (BOARD_WIDTH)) + 'a';
-			action[3] = int((result[3] + 1) / 2 * (BOARD_HEIGHT)) + '1';
+			action[3] = int(((color == 0 ? -1 : 1) * result[3] + 1) / 2 * (BOARD_HEIGHT)) + '1';
 		}
 		fx = tolower(action[0]) - 'a';
 		fy = action[1] - '1';
 		tx = tolower(action[2]) - 'a';
 		ty = action[3] - '1';
-
-		std::cout << "Action : " << action << std::endl;
 
 		if (fx >= 0 && fx < BOARD_WIDTH && fy >= 0 && fy < BOARD_HEIGHT &&
 			tx >= 0 && tx < BOARD_WIDTH && ty >= 0 && ty < BOARD_HEIGHT) {
@@ -251,7 +264,6 @@ void Board::play(bool trainIA) {
 					Piece *tmp = _board[tx][ty];
 					if (move(fx, fy, tx, ty, false)) {
 						if (!isCheck(color)) {
-							std::cout << "moved" << std::endl;
 							_board[fx][fy] = _board[tx][ty];
 							_board[tx][ty] = tmp;
 							move(fx, fy, tx, ty);
@@ -266,6 +278,9 @@ void Board::play(bool trainIA) {
 					}
 				}
 			}
+			else {
+				color == 0 ? _scoreA-- : _scoreB--;
+			}
 		}
 	}
 
@@ -278,9 +293,11 @@ void Board::updatingScore() {
 			if (_board[i][j] != nullptr) {
 				if (_board[i][j]->getColor() == 0) {
 					_scoreA += _board[i][j]->getValue();
+					_scoreB -= _board[i][j]->getValue();
 				}
 				else if (_board[i][j]->getColor() == 1) {
 					_scoreB += _board[i][j]->getValue();
+					_scoreA -= _board[i][j]->getValue();
 				}
 			}
 		}
@@ -289,6 +306,19 @@ void Board::updatingScore() {
 
 void Board::setAI(int n, ChessAI ai) {
 	if (n == 0) {
+		float board[IN_SIZE];
+		for (int i = 0; i < BOARD_WIDTH; i++) {
+			for (int j = 0; j < BOARD_HEIGHT; j++) {
+				if (_board[i][j] != nullptr) {
+					board[i * BOARD_HEIGHT + j] = (_board[i][j]->getName() == "King" ? 1.0 : _board[i][j]->getValue() / 20.0) * (_board[i][j]->getColor() == 0 ? 1 : -1);
+				}
+				else {
+					board[i * BOARD_HEIGHT + j] = 0;
+				}
+			}
+		}
+		_a.setInputs(board);
+		ai.setInputs(board);
 		_a = ai;
 	}
 	else if (n == 1) {
