@@ -2,6 +2,4 @@
 
 Originally juste a chess game.
 
-I tried to add my own machine learning lib to help me debug it.
-
-Unfinished right now, I may continue it someday.
+I tried to add my own ML lib to test it (it doesn't work). I may finish it someday
